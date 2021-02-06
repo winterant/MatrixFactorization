@@ -68,4 +68,28 @@ python main.py
         <td>23033</td>
         <td>1.161768</td>
     </tr>
+    <tr>
+        <td>Yelp (8,021,121)</td>
+        <td>1968703</td>
+        <td>209393</td>
+        <td>2.171064</td>
+    </tr>
 </table>
+
+# Analysis of Dataset
+
+这是对数据集的评分分布进行了分析：
+## movielens
+<img src="data/image/movielens.png" align="middle">
+
+## Amazon digital music small
+<img src="data/image/amazon_music_5.png" align="middle">
+
+## Amazon digital music
+<img src="data/image/amazon_digital_music.png" align="middle">
+
+## Amazon Clothing, Shoes and Jewelry
+<img src="data/image/amazon_CSJ.png" align="middle">
+
+## Yelp
+<img src="data/image/yelp_rating.png" align="middle">
