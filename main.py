@@ -112,7 +112,7 @@ def main():
     df['itemID'] = df.groupby(df['itemID']).ngroup()
     user_count = df['userID'].value_counts().count()  # 用户数量
     item_count = df['itemID'].value_counts().count()  # item数量
-    print(f"{date()}## Dataset contains {user_count} users and {item_count} items.")
+    print(f"{date()}## Dataset contains {df.shape[0]} records, {user_count} users and {item_count} items.")
 
     train_data, valid_data = train_test_split(df, test_size=1 - 0.8, random_state=3)  # split dataset including random
     valid_data, test_data = train_test_split(valid_data, test_size=0.5, random_state=4)
