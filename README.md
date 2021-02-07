@@ -82,7 +82,7 @@ python main.py
     </tr>
 </table>
 
-SE for balanced test: 数据集划分时，验证集与测试集中，每个分值的样本数相等。
+MSE for balanced test: 数据集划分时，验证集与测试集中，每个分值的样本数相等。
 
 # Analysis of Dataset
 

@@ -48,12 +48,24 @@ def date(f='%Y-%m-%d %H:%M:%S'):
 
 def predict_mse(trained_model, dataloader, device):
     mse, sample_count = 0, 0
+    # correct = 0
+    # yes = [0, 0, 0, 0, 0, 0]
+    # tot = [0, 0, 0, 0, 0, 0]
     with torch.no_grad():
         for batch in dataloader:
             user_id, item_id, ratings = [i.to(device) for i in batch]
             predict = trained_model(user_id, item_id)
             mse += torch.nn.functional.mse_loss(predict, ratings, reduction='sum').item()
+            # correct += ((predict - ratings).abs() <= 0.5).sum().item()
+            # for i in range(len(predict)):
+            #     pred = int(ratings[i].item())
+            #     tot[pred] += 1
+            #     if (predict[i] - pred).abs() <= 0.5:
+            #         yes[pred] += 1
             sample_count += len(ratings)
+    # print('正确率: ', correct / sample_count)
+    # for i in range(1, 6):
+    #     print(f'{i}分的准确率：{yes[i] / tot[i]}')
     return mse / sample_count  # dataloader上的均方误差
 
 
