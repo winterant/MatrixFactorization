@@ -7,13 +7,16 @@ import torch
 class Config:
     device = torch.device("cuda:0")
     # device = torch.device("cpu")
-    train_epochs = 30
+    train_epochs = 20
     batch_size = 1024
     learning_rate = 0.01
     l2_regularization = 1e-3  # 正则化系数
     learning_rate_decay = 0.99  # 学习率衰减程度
 
-    dataset_file = 'data/ratings_Digital_Music.csv'
+    # dataset_file = 'data/movie-ratings.csv'
+    # dataset_file = 'data/Digital_Music_5.json.csv'
+    # dataset_file = 'data/ratings_Digital_Music.csv'
+    dataset_file = 'data/amazonCSJ.json.csv'
     model_file = 'best_model.pt'
 
     hidden_K = 10

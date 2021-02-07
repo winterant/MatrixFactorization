@@ -43,42 +43,50 @@ python main.py
         <th>number of users</th>
         <th>number of items</th>
         <th>MSE of MF</th>
+        <th>MSE for balanced test</th>
     </tr>
     <tr>
         <td><a href="http://files.grouplens.org/datasets/movielens/ml-latest-small.zip">movielens-small</a> (100,836)</td>
         <td>610</td>
         <td>9724</td>
         <td>0.804585</td>
+        <td>1.879120</td>
     </tr>
     <tr>
         <td>Amazon Digital Music small (64,706)</td>
         <td>5541</td>
         <td>3568</td>
         <td>0.900899</td>
+        <td>2.436231</td>
     </tr>
     <tr>
         <td>Amazon Digital Music (836,006)</td>
         <td>478235</td>
         <td>266414</td>
         <td>0.875224</td>
+        <td>3.566706</td>
     </tr>
     <tr>
         <td>Amazon Clothing, Shoes and Jewelry (278,677)</td>
         <td>39387</td>
         <td>23033</td>
         <td>1.161768</td>
+        <td>2.320887</td>
     </tr>
     <tr>
         <td>Yelp (8,021,121)</td>
         <td>1968703</td>
         <td>209393</td>
         <td>2.171064</td>
+        <td>-</td>
     </tr>
 </table>
 
+SE for balanced test: 数据集划分时，验证集与测试集中，每个分值的样本数相等。
+
 # Analysis of Dataset
 
-这是对数据集的评分分布进行了分析：
+对数据集的评分分布进行了分析：
 ## movielens
 <img src="data/image/movielens.png" align="middle">
 

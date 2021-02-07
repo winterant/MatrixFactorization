@@ -1,4 +1,7 @@
+import random
 import time
+from collections import defaultdict
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -101,6 +104,22 @@ def test(dataloader, model):
     print(f"{date()}## Test end, test mse is {test_loss:.6f}, time used {end_time - start_time:.0f} seconds.")
 
 
+def split_dataset(df: pd.DataFrame, test_num_per_star=1000):
+    """
+    :param df: 数据集
+    :param test_num_per_star: 从数据集中，每个评分值中，抽取的样本数量
+    :return: 训练集、测试集
+    """
+    stars = defaultdict(list)
+    for idx, r in df['rating'].items():
+        stars[r].append(idx)
+    test_idx_list = list()
+    for k in stars.keys():
+        test_idx = random.sample(stars[k], min(len(stars[k]), test_num_per_star))
+        test_idx_list.extend(test_idx)
+    return df.drop(index=test_idx_list), df.loc[test_idx_list]
+
+
 def main():
     config = Config()
     print(config)
@@ -114,8 +133,14 @@ def main():
     item_count = df['itemID'].value_counts().count()  # item数量
     print(f"{date()}## Dataset contains {df.shape[0]} records, {user_count} users and {item_count} items.")
 
-    train_data, valid_data = train_test_split(df, test_size=1 - 0.8, random_state=3)  # split dataset including random
+    # 划分训练集、验证集、测试集；
+    # $方式1：按8:1:1的比例随机划分；
+    train_data, valid_data = train_test_split(df, test_size=1 - 0.8, random_state=3)
     valid_data, test_data = train_test_split(valid_data, test_size=0.5, random_state=4)
+    # $方式2：对于每个评分值，抽取固定数量的样本作为验证集/测试集；
+    # train_data, valid_data = split_dataset(df, test_num_per_star=2000)
+    # valid_data, test_data = split_dataset(valid_data, test_num_per_star=1000)
+
     train_dataset = CFDataset(train_data)
     valid_dataset = CFDataset(valid_data)
     test_dataset = CFDataset(test_data)
