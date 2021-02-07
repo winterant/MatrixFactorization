@@ -15,8 +15,8 @@ class Config:
 
     # dataset_file = 'data/movie-ratings.csv'
     # dataset_file = 'data/Digital_Music_5.json.csv'
-    # dataset_file = 'data/ratings_Digital_Music.csv'
-    dataset_file = 'data/amazonCSJ.json.csv'
+    dataset_file = 'data/ratings_Digital_Music.csv'
+    # dataset_file = 'data/amazonCSJ.json.csv'
     model_file = 'best_model.pt'
 
     hidden_K = 10
