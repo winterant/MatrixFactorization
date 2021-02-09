@@ -19,7 +19,7 @@ class Config:
     # dataset_file = 'data/amazonCSJ.json.csv'
     saved_model = 'best_model.pt'
 
-    hidden_K = 10
+    embedding_dim = 10
 
     def __init__(self):
         attributes = inspect.getmembers(self, lambda a: not inspect.isfunction(a))

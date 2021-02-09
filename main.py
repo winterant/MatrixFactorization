@@ -94,7 +94,7 @@ def main():
     valid_dlr = DataLoader(valid_dataset, batch_size=config.batch_size)
     test_dlr = DataLoader(test_dataset, batch_size=config.batch_size)
 
-    model = FunkSVD(user_count, item_count, config.hidden_K).to(config.device)
+    model = FunkSVD(user_count, item_count, config.embedding_dim).to(config.device)
     train(train_dlr, valid_dlr, model, config, config.saved_model)
 
     print(f'{date()}## Start the testing!')
@@ -107,7 +107,7 @@ def main():
           f' Precision of every star is {[int(i * 1e4) / 1e4 for i in each_precision]}')
 
     recall, precision = evaluate_top_n(trained_model, test_dlr,
-                                       candidate_items=df['itemID'].unique().tolist(), random_candi=5,
+                                       candidate_items=df['itemID'].unique().tolist(), random_candi=20,
                                        topN=5)
     print(f'{date()}## Test for Top-N Recommender: Recall@{5} is {recall:.4f}; Precision is {precision:.4f}')
 
