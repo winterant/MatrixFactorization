@@ -3,13 +3,11 @@
 
 # Main Idea
 
-每个user或item表示为K维向量，分别组成user矩阵P和item矩阵Q。
-
-这里使用FunkSVD方法进行矩阵分解：
-
-原user-item矩阵 = PQ
-
-注：加入正则化防止过拟合。
+每个user或item表示为K维向量，
+分别组成user矩阵**P**和item矩阵**Q**，
+令**M**为user与item交互矩阵。
+使用FunkSVD方法进行矩阵分解：`M = PQ`。
+目标函数采用均方误差（MSE），使用梯度下降法优化。
 
 参考：https://blog.csdn.net/qq_19446965/article/details/82079367
 
@@ -28,7 +26,8 @@ For example:
 
 注：本实验将数据集按0.8/0.1/0.1的比例划分为训练集、验证集、测试集。
 数据集前三列分别为用户id、产品id、评分（1~5）。
-若使用了amazon数据集json格式，可使用amazon_preprocess.py预处理。
+若使用json格式的amazon（或yelp）数据集，
+可使用`amazon_preprocess.py`(或`yelp_preprocess.py`)预处理。
 
 # Running
 Train and evaluate the model
@@ -42,8 +41,8 @@ python main.py
         <th>Dataset</th>
         <th>number of users</th>
         <th>number of items</th>
-        <th>MSE of MF</th>
-        <th>MSE for balanced test</th>
+        <th>MSE</th>
+        <th>MSE of balanced test</th>
     </tr>
     <tr>
         <td><a href="http://files.grouplens.org/datasets/movielens/ml-latest-small.zip">movielens-small</a> (100,836)</td>
@@ -82,11 +81,11 @@ python main.py
     </tr>
 </table>
 
-MSE for balanced test: 数据集划分时，验证集与测试集中，每个分值的样本数相等。
+*MSE of balanced test: 数据集划分时，验证集与测试集中，每个分值对应的样本数相等。
 
 # Analysis of Dataset
 
-对数据集的评分分布进行了分析：
+对数据集的评分分布进行了统计：
 ## movielens
 <img src="data/image/movielens.png" align="middle">
 

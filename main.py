@@ -1,16 +1,14 @@
-import random
 import time
-from collections import defaultdict
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 import torch
 from torch import nn
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
 from config import Config
+from utils import date, evaluate_mse, MFDataset, evaluate_top_n, evaluate_precision
 
 
 class FunkSVD(nn.Module):
@@ -29,50 +27,10 @@ class FunkSVD(nn.Module):
         return pred
 
 
-class CFDataset(Dataset):
-    def __init__(self, df):
-        self.user_id = torch.LongTensor(df['userID'].to_list())
-        self.item_id = torch.LongTensor(df['itemID'].to_list())
-        self.rating = torch.Tensor(df['rating'].to_list())
-
-    def __getitem__(self, idx):
-        return self.user_id[idx], self.item_id[idx], self.rating[idx]
-
-    def __len__(self):
-        return self.rating.shape[0]
-
-
-def date(f='%Y-%m-%d %H:%M:%S'):
-    return time.strftime(f, time.localtime())
-
-
-def predict_mse(trained_model, dataloader, device):
-    mse, sample_count = 0, 0
-    # correct = 0
-    # yes = [0, 0, 0, 0, 0, 0]
-    # tot = [0, 0, 0, 0, 0, 0]
-    with torch.no_grad():
-        for batch in dataloader:
-            user_id, item_id, ratings = [i.to(device) for i in batch]
-            predict = trained_model(user_id, item_id)
-            mse += torch.nn.functional.mse_loss(predict, ratings, reduction='sum').item()
-            # correct += ((predict - ratings).abs() <= 0.5).sum().item()
-            # for i in range(len(predict)):
-            #     pred = int(ratings[i].item())
-            #     tot[pred] += 1
-            #     if (predict[i] - pred).abs() <= 0.5:
-            #         yes[pred] += 1
-            sample_count += len(ratings)
-    # print('正确率: ', correct / sample_count)
-    # for i in range(1, 6):
-    #     print(f'{i}分的准确率：{yes[i] / tot[i]}')
-    return mse / sample_count  # dataloader上的均方误差
-
-
 def train(train_dataloader, valid_dataloader, model, config, model_path):
     print(f'{date()}## Start the training!')
-    train_mse = predict_mse(model, train_dataloader, config.device)
-    valid_mse = predict_mse(model, valid_dataloader, config.device)
+    train_mse = evaluate_mse(model, train_dataloader, config.device)
+    valid_mse = evaluate_mse(model, valid_dataloader, config.device)
     print(f'{date()}#### Initial train mse {train_mse:.6f}, validation mse {valid_mse:.6f}')
     start_time = time.perf_counter()
 
@@ -96,7 +54,7 @@ def train(train_dataloader, valid_dataloader, model, config, model_path):
 
         lr_sch.step()
         model.eval()  # 停止训练状态
-        valid_mse = predict_mse(model, valid_dataloader, config.device)
+        valid_mse = evaluate_mse(model, valid_dataloader, config.device)
         train_loss = total_loss / total_samples
         print(f"{date()}#### Epoch {epoch:3d}; train mse {train_loss:.6f}; validation mse {valid_mse:.6f}")
 
@@ -106,30 +64,6 @@ def train(train_dataloader, valid_dataloader, model, config, model_path):
 
     end_time = time.perf_counter()
     print(f'{date()}## End of training! Time used {end_time - start_time:.0f} seconds.')
-
-
-def test(dataloader, model):
-    print(f'{date()}## Start the testing!')
-    start_time = time.perf_counter()
-    test_loss = predict_mse(model, dataloader, next(model.parameters()).device)
-    end_time = time.perf_counter()
-    print(f"{date()}## Test end, test mse is {test_loss:.6f}, time used {end_time - start_time:.0f} seconds.")
-
-
-def split_dataset(df: pd.DataFrame, test_num_per_star=1000):
-    """
-    :param df: 数据集
-    :param test_num_per_star: 从数据集中，每个评分值中，抽取的样本数量
-    :return: 训练集、测试集
-    """
-    stars = defaultdict(list)
-    for idx, r in df['rating'].items():
-        stars[r].append(idx)
-    test_idx_list = list()
-    for k in stars.keys():
-        test_idx = random.sample(stars[k], min(len(stars[k]), test_num_per_star))
-        test_idx_list.extend(test_idx)
-    return df.drop(index=test_idx_list), df.loc[test_idx_list]
 
 
 def main():
@@ -153,16 +87,29 @@ def main():
     # train_data, valid_data = split_dataset(df, test_num_per_star=2000)
     # valid_data, test_data = split_dataset(valid_data, test_num_per_star=1000)
 
-    train_dataset = CFDataset(train_data)
-    valid_dataset = CFDataset(valid_data)
-    test_dataset = CFDataset(test_data)
+    train_dataset = MFDataset(train_data)
+    valid_dataset = MFDataset(valid_data)
+    test_dataset = MFDataset(test_data)
     train_dlr = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     valid_dlr = DataLoader(valid_dataset, batch_size=config.batch_size)
     test_dlr = DataLoader(test_dataset, batch_size=config.batch_size)
 
     model = FunkSVD(user_count, item_count, config.hidden_K).to(config.device)
-    train(train_dlr, valid_dlr, model, config, config.model_file)
-    test(test_dlr, torch.load(config.model_file))
+    train(train_dlr, valid_dlr, model, config, config.saved_model)
+
+    print(f'{date()}## Start the testing!')
+    trained_model = torch.load(config.saved_model)
+    test_loss = evaluate_mse(trained_model, test_dlr, next(model.parameters()).device)
+    print(f'{date()}## Test for Rating Prediction: mse is {test_loss:.6f}')
+
+    overall_precision, each_precision = evaluate_precision(trained_model, test_dlr, next(model.parameters()).device)
+    print(f'{date()}## Test for Rating Prediction: Overall Precision is {overall_precision:.4f};'
+          f'Precision of every star is {[int(i * 1e4) / 1e4 for i in each_precision]}')
+
+    recall, precision = evaluate_top_n(torch.load(config.saved_model), config.device, test_data,
+                                       batch_size=config.batch_size,
+                                       candidate_items=df['itemID'].unique().tolist(), topN=5)
+    print(f'{date()}## Test for Top-N Recommender: Recall@{5} is {recall:.4f}; Precision is {precision:.4f}')
 
 
 if __name__ == '__main__':

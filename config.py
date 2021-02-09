@@ -14,10 +14,10 @@ class Config:
     learning_rate_decay = 0.99  # 学习率衰减程度
 
     # dataset_file = 'data/movie-ratings.csv'
-    # dataset_file = 'data/Digital_Music_5.json.csv'
-    dataset_file = 'data/ratings_Digital_Music.csv'
+    dataset_file = 'data/Digital_Music_5.json.csv'
+    # dataset_file = 'data/ratings_Digital_Music.csv'
     # dataset_file = 'data/amazonCSJ.json.csv'
-    model_file = 'best_model.pt'
+    saved_model = 'best_model.pt'
 
     hidden_K = 10
 
