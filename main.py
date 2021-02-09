@@ -29,8 +29,8 @@ class FunkSVD(nn.Module):
 
 def train(train_dataloader, valid_dataloader, model, config, model_path):
     print(f'{date()}## Start the training!')
-    train_mse = evaluate_mse(model, train_dataloader, config.device)
-    valid_mse = evaluate_mse(model, valid_dataloader, config.device)
+    train_mse = evaluate_mse(model, train_dataloader)
+    valid_mse = evaluate_mse(model, valid_dataloader)
     print(f'{date()}#### Initial train mse {train_mse:.6f}, validation mse {valid_mse:.6f}')
     start_time = time.perf_counter()
 
@@ -54,7 +54,7 @@ def train(train_dataloader, valid_dataloader, model, config, model_path):
 
         lr_sch.step()
         model.eval()  # 停止训练状态
-        valid_mse = evaluate_mse(model, valid_dataloader, config.device)
+        valid_mse = evaluate_mse(model, valid_dataloader)
         train_loss = total_loss / total_samples
         print(f"{date()}#### Epoch {epoch:3d}; train mse {train_loss:.6f}; validation mse {valid_mse:.6f}")
 
@@ -99,15 +99,15 @@ def main():
 
     print(f'{date()}## Start the testing!')
     trained_model = torch.load(config.saved_model)
-    test_loss = evaluate_mse(trained_model, test_dlr, next(model.parameters()).device)
+    test_loss = evaluate_mse(trained_model, test_dlr)
     print(f'{date()}## Test for Rating Prediction: mse is {test_loss:.6f}')
 
-    overall_precision, each_precision = evaluate_precision(trained_model, test_dlr, next(model.parameters()).device)
+    overall_precision, each_precision = evaluate_precision(trained_model, test_dlr)
     print(f'{date()}## Test for Rating Prediction: Overall Precision is {overall_precision:.4f};'
           f' Precision of every star is {[int(i * 1e4) / 1e4 for i in each_precision]}')
 
-    recall, precision = evaluate_top_n(torch.load(config.saved_model), test_data, batch_size=config.batch_size,
-                                       candidate_items=df['itemID'].unique().tolist(), random_candi=20,
+    recall, precision = evaluate_top_n(trained_model, test_dlr,
+                                       candidate_items=df['itemID'].unique().tolist(), random_candi=5,
                                        topN=5)
     print(f'{date()}## Test for Top-N Recommender: Recall@{5} is {recall:.4f}; Precision is {precision:.4f}')
 
