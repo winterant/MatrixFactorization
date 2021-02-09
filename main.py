@@ -104,11 +104,11 @@ def main():
 
     overall_precision, each_precision = evaluate_precision(trained_model, test_dlr, next(model.parameters()).device)
     print(f'{date()}## Test for Rating Prediction: Overall Precision is {overall_precision:.4f};'
-          f'Precision of every star is {[int(i * 1e4) / 1e4 for i in each_precision]}')
+          f' Precision of every star is {[int(i * 1e4) / 1e4 for i in each_precision]}')
 
-    recall, precision = evaluate_top_n(torch.load(config.saved_model), config.device, test_data,
-                                       batch_size=config.batch_size,
-                                       candidate_items=df['itemID'].unique().tolist(), topN=5)
+    recall, precision = evaluate_top_n(torch.load(config.saved_model), test_data, batch_size=config.batch_size,
+                                       candidate_items=df['itemID'].unique().tolist(), random_candi=20,
+                                       topN=5)
     print(f'{date()}## Test for Top-N Recommender: Recall@{5} is {recall:.4f}; Precision is {precision:.4f}')
 
 

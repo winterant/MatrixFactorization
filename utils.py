@@ -69,7 +69,17 @@ def evaluate_precision(trained_model, dataloader, device):
     return correct / sample_count, [i / max(1, j) for i, j in zip(yes, tot)]
 
 
-def evaluate_top_n(trained_model, device, test_data: pd.DataFrame, batch_size, candidate_items, topN=5):
+def evaluate_top_n(trained_model, test_data: pd.DataFrame, batch_size, candidate_items, random_candi=0, topN=5):
+    """
+    top-N推荐系统评估
+    :param trained_model: 训练好的模型
+    :param test_data: 测试集
+    :param batch_size: batch size
+    :param candidate_items: item候选集；list类型
+    :param random_candi: 默认0表示整个item候选集；大于0时表示从item候选集中为每个user随机抽取的item数量
+    :param topN: top-N推荐系统中的N
+    :return:
+    """
     class TestDataset(torch.utils.data.Dataset):
         def __init__(self, user_id_list, item_id_list):
             self.user_id = torch.LongTensor(user_id_list)
@@ -83,27 +93,31 @@ def evaluate_top_n(trained_model, device, test_data: pd.DataFrame, batch_size, c
 
     user_list, item_list = [], []
     for uid, row in test_data[['userID', 'itemID']][test_data['rating'] >= 4].groupby('userID'):
-        curr_items = set(candidate_items).union(set(row['itemID']))
-        user_list.extend([uid] * len(curr_items))
-        item_list.extend(list(curr_items))
+        if random_candi > 0:
+            user_candi_items = set(random.sample(candidate_items, k=random_candi)).union(set(row['itemID']))
+        else:
+            user_candi_items = set(candidate_items).union(set(row['itemID']))
+        user_list.extend([uid] * len(user_candi_items))
+        item_list.extend(list(user_candi_items))
     dlr = DataLoader(TestDataset(user_list, item_list), batch_size=batch_size)
 
     top_n_list = defaultdict(list)
     with torch.no_grad():
         for batch in dlr:
-            user_id, item_id = [i.to(device) for i in batch]
+            user_id, item_id = [i.to(next(trained_model.parameters()).device) for i in batch]
             predict = trained_model(user_id, item_id)
-            for uid, iid, p in zip(user_id, item_id, predict):
+            for user_id, item_id, pred in zip(user_id, item_id, predict):
+                uid, iid, p = int(user_id), int(item_id), float(pred)
                 if len(top_n_list[uid]) < topN:
-                    top_n_list[uid].append([p, iid])
+                    top_n_list[uid].append([iid, p])
                 elif p > top_n_list[uid][-1][0]:
-                    top_n_list[uid][-1] = (p, iid)
-                top_n_list[uid].sort(reverse=True)
+                    top_n_list[uid][-1] = (iid, p)
+                top_n_list[uid].sort(key=lambda x: -x[1])
 
     pred_pos, real_pos = 0, 0
     for uid, row in test_data[test_data['rating'] >= 4].groupby('userID'):
         real_items = set(row['itemID'])
-        pred_pos += len(real_items.intersection(top_n_list[uid]))
+        pred_pos += len(real_items.intersection([iid for iid, _ in top_n_list[uid]]))
         real_pos += len(real_items)
     recall = pred_pos / real_pos
     precision = pred_pos / (len(top_n_list) * topN)
