@@ -33,12 +33,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', dest='data_path', default='Digital_Music_5.json')
     parser.add_argument('--data_source', dest='data_source', default='amazon')
-    parser.add_argument('--save_file', dest='save_file', default='./amazon_ratings.csv')
+    parser.add_argument('--save_file', dest='save_file', default='./amazon_music_ratings.csv')
     args = parser.parse_args()
 
     if args.data_source == 'amazon':
         col_name = ['reviewerID', 'asin', 'overall']
-    else:
+    else:  # yelp
         col_name = ['user_id', 'business_id', 'stars']
-    os.makedirs(os.path.dirname(args.save_file), exist_ok=True)
+    if '/' in args.save_file:
+        os.makedirs(os.path.dirname(args.save_file), exist_ok=True)
     process_dataset(args.data_path, col_name, args.save_file)

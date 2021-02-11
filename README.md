@@ -28,10 +28,15 @@ For example:
 若使用json格式的amazon（或yelp）数据集，
 可使用`data_preprocess.py`预处理。
 
+For example:
+```shell script
+python data_preprocess.py --data_path Digital_Music_5.json --data_source amazon --save_file amazon_music_ratings.csv
+```
+
 # Running
 Train and evaluate the model
 ```
-python main.py
+python main.py --dataset_file data/ratings_Digital_Music.csv
 ```
 
 # Experiment
