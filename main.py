@@ -8,7 +8,7 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
 from config import Config
-from utils import date, evaluate_mse, MFDataset, evaluate_top_n, evaluate_precision
+from utils import date, evaluate_mse, MFDataset, evaluate_top_n, evaluate_precision, split_dataset
 
 
 class FunkSVD(nn.Module):

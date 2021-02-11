@@ -70,18 +70,18 @@ python main.py --dataset_file data/ratings_Digital_Music.csv
         <td>3.566706</td>
     </tr>
     <tr>
-        <td>Amazon Clothing, Shoes and Jewelry small (278,677)</td>
-        <td>39387</td>
-        <td>23033</td>
-        <td>1.161768</td>
-        <td>2.320887</td>
+        <td>Amazon Clothing, Shoes and Jewelry (5,748,919)</td>
+        <td>3117268</td>
+        <td>1136004</td>
+        <td>1.512551</td>
+        <td>3.266632</td>
     </tr>
     <tr>
         <td>Yelp (8,021,121)</td>
         <td>1968703</td>
         <td>209393</td>
         <td>2.171064</td>
-        <td>-</td>
+        <td>2.429343</td>
     </tr>
 </table>
 
