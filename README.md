@@ -17,9 +17,8 @@
 
 # Dataset
 
-Amazon(2014) http://jmcauley.ucsd.edu/data/amazon/links.html
-
-Yelp(2020) https://www.yelp.com/dataset
+1. Amazon(2014) http://jmcauley.ucsd.edu/data/amazon/links.html
+2. Yelp(2020) https://www.yelp.com/dataset
 
 For example:
 `data/ratings_Digital_Music.csv` (Amazon Digital Music: rating only)
@@ -27,7 +26,7 @@ For example:
 注：本实验将数据集按0.8/0.1/0.1的比例划分为训练集、验证集、测试集。
 数据集前三列分别为用户id、产品id、评分（1~5）。
 若使用json格式的amazon（或yelp）数据集，
-可使用`amazon_preprocess.py`(或`yelp_preprocess.py`)预处理。
+可使用`data_preprocess.py`预处理。
 
 # Running
 Train and evaluate the model
@@ -66,7 +65,7 @@ python main.py
         <td>3.566706</td>
     </tr>
     <tr>
-        <td>Amazon Clothing, Shoes and Jewelry (278,677)</td>
+        <td>Amazon Clothing, Shoes and Jewelry small (278,677)</td>
         <td>39387</td>
         <td>23033</td>
         <td>1.161768</td>
